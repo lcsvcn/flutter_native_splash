@@ -52,7 +52,7 @@ final List<_IosLaunchImageTemplate> _iOSBrandingImagesDark =
 
 /// Create iOS splash screen
 void _createiOSSplash({
-  bool shouldSkipImage = false,
+  required bool shouldSkipImage,
   required String? imagePath,
   required String? darkImagePath,
   String? brandingImagePath,
