@@ -66,8 +66,8 @@ void _createiOSSplash({
   required String? backgroundImage,
   required String? darkBackgroundImage,
 }) {
-  if(shouldSkipImage) {
-     if (Directory(_flavorHelper.iOSAssetsLaunchImageFolder).existsSync()) {
+  if (shouldSkipImage) {
+    if (Directory(_flavorHelper.iOSAssetsLaunchImageFolder).existsSync()) {
       Directory(_flavorHelper.iOSAssetsLaunchImageFolder)
           .delete(recursive: true);
     }
@@ -96,7 +96,13 @@ void _createiOSSplash({
             File(_flavorHelper.iOSAssetsLaunchImageFolder + template.fileName);
         if (file.existsSync()) file.deleteSync();
       }
-    }  
+    }
+    final launchImageFile =
+        File('${_flavorHelper.iOSAssetsLaunchImageFolder}Contents.json');
+    launchImageFile.createSync(recursive: true);
+    launchImageFile.writeAsStringSync(
+      darkImagePath != null ? _iOSContentsJsonDark : _iOSContentsJson,
+    );
   }
 
   if (brandingImagePath != null) {
@@ -126,13 +132,6 @@ void _createiOSSplash({
     }
   }
 
-  final launchImageFile =
-      File('${_flavorHelper.iOSAssetsLaunchImageFolder}Contents.json');
-  launchImageFile.createSync(recursive: true);
-  launchImageFile.writeAsStringSync(
-    darkImagePath != null ? _iOSContentsJsonDark : _iOSContentsJson,
-  );
-
   if (brandingImagePath != null) {
     final brandingImageFile =
         File('${_flavorHelper.iOSAssetsBrandingImageFolder}Contents.json');
@@ -149,6 +148,7 @@ void _createiOSSplash({
     brandingImagePath: brandingImagePath,
     iosContentMode: iosContentMode,
     iosBrandingContentMode: iosBrandingContentMode,
+    shouldRemoveLaunchImage: shouldSkipImage,
   );
   _createBackground(
     colorString: color,
@@ -216,6 +216,7 @@ void _applyImageiOS({
 void _updateLaunchScreenStoryboard({
   required String? imagePath,
   required String iosContentMode,
+  required bool shouldRemoveLaunchImage,
   String? brandingImagePath,
   String? iosBrandingContentMode,
 }) {
@@ -241,6 +242,7 @@ void _updateLaunchScreenStoryboard({
 
   // Find the splash imageView
   final subViews = view.getElement('subviews');
+
   if (subViews == null) {
     print(
       'Not able to find "subviews" in ${_flavorHelper.iOSLaunchScreenStoryboardName}.storyboard. Image for '
@@ -303,6 +305,10 @@ void _updateLaunchScreenStoryboard({
     );
 
     brandingImageView.setAttribute('contentMode', iosBrandingContentMode);
+
+    if (imagePath == null) {
+      imageView.remove();
+    }
   }
   // Find the resources
   final resources = documentData?.getElement('resources');
@@ -404,6 +410,7 @@ void _createLaunchScreenStoryboard({
   required String iosContentMode,
   required String? iosBrandingContentMode,
   required String? brandingImagePath,
+  bool shouldRemoveLaunchImage = false,
 }) {
   final file = File(_flavorHelper.iOSLaunchScreenStoryboardFile);
   file.createSync(recursive: true);
@@ -414,6 +421,7 @@ void _createLaunchScreenStoryboard({
     brandingImagePath: brandingImagePath,
     iosContentMode: iosContentMode,
     iosBrandingContentMode: iosBrandingContentMode,
+    shouldRemoveLaunchImage: shouldRemoveLaunchImage,
   );
 }
 
